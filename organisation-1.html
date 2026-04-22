@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrganisAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;--border:#2a2a3d;--accent:#6c63ff;--accent2:#ff6584;--accent3:#43e97b;--accent4:#f7971e;--accent5:#38bdf8;--text:#e8e8f0;--text-muted:#7a7a9a;--r:16px;--rs:8px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+h1,h2,h3,h4{font-family:'Syne',sans-serif;}
+/* LOGIN */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1000;}
+.lc{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:48px 40px;width:380px;text-align:center;position:relative;overflow:hidden;}
+.lc::before{content:'';position:absolute;top:-80px;left:-80px;width:200px;height:200px;background:radial-gradient(circle,rgba(108,99,255,0.3),transparent 70%);pointer-events:none;}
+.lc::after{content:'';position:absolute;bottom:-60px;right:-60px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,101,132,0.2),transparent 70%);pointer-events:none;}
+.logo{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.logo-sub{color:var(--text-muted);font-size:13px;margin-bottom:32px;}
+.lc input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:13px 15px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:10px;outline:none;transition:border-color .2s;}
+.lc input:focus{border-color:var(--accent);}
+.btn-p{width:100%;background:linear-gradient(135deg,var(--accent),#8b5cf6);border:none;border-radius:var(--rs);padding:13px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:4px;}
+.btn-p:hover{opacity:.9;transform:translateY(-1px);}
+.lerr{color:var(--accent2);font-size:12px;margin-top:8px;display:none;}
+/* LAYOUT */
+#app{display:none;min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:238px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 14px;z-index:100;overflow-y:auto;}
+.s-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding:0 8px;margin-bottom:24px;}
+.nav-sec{font-size:9px;color:var(--text-muted);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0 8px;margin:12px 0 5px;}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:var(--rs);cursor:pointer;font-size:12px;color:var(--text-muted);transition:all .2s;margin-bottom:1px;}
+.ni:hover{background:var(--surface2);color:var(--text);}
+.ni.active{background:rgba(108,99,255,.15);color:var(--accent);}
+.ni .ic{font-size:15px;width:18px;text-align:center;}
+.s-bot{margin-top:auto;padding-top:10px;}
+.ubadge{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--rs);background:var(--surface2);cursor:pointer;}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+/* MAIN */
+.main{margin-left:238px;padding:26px 30px;min-height:100vh;}
+.page{display:none;}
+.page.active{display:block;animation:fi .3s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:22px;}
+.ph h2{font-size:24px;font-weight:800;margin-bottom:3px;}
+.ph p{color:var(--text-muted);font-size:12px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;}
+.ct{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+/* STAT */
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:17px 20px;position:relative;overflow:hidden;}
+.sc::after{content:'';position:absolute;bottom:-20px;right:-20px;width:75px;height:75px;border-radius:50%;opacity:.12;}
+.sc.pu::after{background:var(--accent)}.sc.pi::after{background:var(--accent2)}.sc.gr::after{background:var(--accent3)}.sc.or::after{background:var(--accent4)}
+.sl{font-size:10px;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;}
+.sv{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;}
+.sv.pu{color:var(--accent)}.sv.pi{color:var(--accent2)}.sv.gr{color:var(--accent3)}.sv.or{color:var(--accent4)}
+/* OBJ */
+.oi{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);}
+.oi:last-child{border-bottom:none;}
+.oc{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:10px;}
+.oc.done{background:var(--accent3);border-color:var(--accent3);color:#fff;}
+.ii{background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;width:100%;outline:none;}
+.ii::placeholder{color:var(--text-muted);}
+/* INPUTS */
+.fi{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.fi:focus{border-color:var(--accent);}
+.fis{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+/* BTN */
+.bc{background:var(--accent);border:none;border-radius:var(--rs);padding:9px 18px;color:#fff;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+.bc:hover{opacity:.85;}
+.bs{padding:4px 10px;border-radius:6px;font-size:10px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;border:none;transition:opacity .2s;}
+.ba{background:rgba(108,99,255,.2);color:var(--accent)}.bd{background:rgba(247,151,30,.2);color:var(--accent4)}.bf{background:rgba(67,233,123,.2);color:var(--accent3)}.bx{background:rgba(255,101,132,.2);color:var(--accent2)}
+.bs:hover{opacity:.7;}
+.delbtn{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:3px;transition:color .2s;}
+.delbtn:hover{color:var(--accent2);}
+.badge{background:var(--accent2);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:10px;margin-left:auto;}
+/* 2MIN */
+.tmb{background:rgba(67,233,123,.15);border:1px solid rgba(67,233,123,.3);color:var(--accent3);font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+/* CAPTURE */
+.cz{background:var(--surface2);border:2px dashed var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px;display:flex;gap:11px;align-items:flex-start;transition:border-color .2s;}
+.cz:focus-within{border-color:var(--accent);}
+.cz textarea{flex:1;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;resize:none;outline:none;min-height:50px;}
+.cz textarea::placeholder{color:var(--text-muted);}
+.citem{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 13px;margin-bottom:6px;display:flex;align-items:center;gap:9px;}
+/* GTD */
+.gtabs{display:flex;gap:5px;margin-bottom:14px;border-bottom:1px solid var(--border);}
+.gt{padding:8px 13px;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent;transition:all .2s;margin-bottom:-1px;}
+.gt.active{color:var(--accent);border-bottom-color:var(--accent);}
+.gl{display:none;}.gl.active{display:block;}
+.ctxf{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
+.cf{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--text-muted);background:transparent;transition:all .2s;}
+.cf.af{border-color:var(--accent);color:var(--accent);background:rgba(108,99,255,.1);}
+.gi{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 13px;margin-bottom:6px;display:flex;align-items:center;gap:9px;}
+.ctag{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:600;}
+.tb{background:rgba(108,99,255,.2);color:var(--accent)}.to{background:rgba(56,189,248,.2);color:var(--accent5)}.tt{background:rgba(247,151,30,.2);color:var(--accent4)}.tv{background:rgba(255,101,132,.2);color:var(--accent2)}.tm{background:rgba(67,233,123,.2);color:var(--accent3)}
+.air{display:flex;gap:8px;margin-top:9px;}
+.air input,.air select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;}
+.air input{flex:1;}
+/* EISENHOWER */
+.matrix{display:grid;grid-template-columns:auto 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:0;}
+.quad{border-radius:var(--r);padding:13px;border:1px solid var(--border);overflow-y:auto;min-height:200px;}
+.q1{background:rgba(255,101,132,.07);border-color:rgba(255,101,132,.25);}
+.q2{background:rgba(108,99,255,.07);border-color:rgba(108,99,255,.25);}
+.q3{background:rgba(247,151,30,.07);border-color:rgba(247,151,30,.25);}
+.q4{background:rgba(100,100,120,.06);}
+.qt{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+.q1 .qt{color:var(--accent2)}.q2 .qt{color:var(--accent)}.q3 .qt{color:var(--accent4)}.q4 .qt{color:var(--text-muted)}
+.qs{font-size:9px;color:var(--text-muted);margin-bottom:8px;}
+.mi{background:rgba(255,255,255,.05);border-radius:5px;padding:6px 9px;margin-bottom:4px;font-size:11px;display:flex;align-items:center;justify-content:space-between;cursor:grab;gap:5px;}
+.mir{display:flex;gap:6px;margin-top:6px;}
+.mir input{flex:1;background:rgba(255,255,255,.05);border:1px dashed var(--border);border-radius:5px;padding:5px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;outline:none;}
+.bam{background:rgba(255,255,255,.08);border:none;border-radius:5px;padding:5px 10px;color:var(--text);cursor:pointer;font-size:12px;}
+/* TIME BLOCKING */
+.tleg{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);}
+.ld{width:7px;height:7px;border-radius:50%;}
+.tgrid{display:flex;flex-direction:column;gap:3px;max-height:560px;overflow-y:auto;}
+.tslot{display:flex;gap:9px;align-items:stretch;min-height:42px;}
+.tlabel{width:45px;font-size:10px;color:var(--text-muted);text-align:right;padding-top:6px;flex-shrink:0;}
+.tblock{flex:1;border-radius:var(--rs);border:1px dashed var(--border);padding:6px 11px;font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;min-height:42px;}
+.tblock:hover{border-color:var(--accent);background:rgba(108,99,255,.05);}
+.tblock.feu{background:rgba(108,99,255,.12);border-color:rgba(108,99,255,.4);border-style:solid;}
+.tblock.fluide{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.3);border-style:solid;}
+.tblock.maintenance{background:rgba(247,151,30,.08);border-color:rgba(247,151,30,.3);border-style:solid;}
+.tblock.pause{background:rgba(67,233,123,.05);border-color:rgba(67,233,123,.2);border-style:solid;}
+.bdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.feu .bdot{background:var(--accent)}.fluide .bdot{background:var(--accent5)}.maintenance .bdot{background:var(--accent4)}.pause .bdot{background:var(--accent3)}
+/* TIMER */
+.tcon{display:flex;flex-direction:column;align-items:center;padding:28px;}
+.trw{position:relative;width:190px;height:190px;margin-bottom:20px;}
+.trw svg{transform:rotate(-90deg);}
+.tbg{fill:none;stroke:var(--border);stroke-width:8;}
+.tpr{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .5s;}
+.trw.work .tpr{stroke:var(--accent)}.trw.rest .tpr{stroke:var(--accent3)}
+.tdisp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.ttime{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;}
+.tph{font-size:10px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:1px;}
+.tctrl{display:flex;gap:10px;}
+.tbtn{padding:11px 24px;border-radius:var(--rs);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:all .2s;}
+.tbtn.start{background:var(--accent);color:#fff;}
+.tbtn.start.run{background:var(--accent2);}
+.tbtn.rst{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);}
+.tinp{width:100%;max-width:300px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;margin-bottom:18px;}
+.tcyc{font-size:12px;color:var(--text-muted);margin-top:10px;}
+.tcyc span{color:var(--accent4);font-weight:700;font-family:'Syne',sans-serif;}
+.tplbl{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;}
+.tplbl.w{color:var(--accent)}.tplbl.r{color:var(--accent3)}
+/* HABITUDES */
+.hc{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:15px 17px;margin-bottom:9px;display:flex;align-items:center;gap:13px;}
+.hi{flex:1;}
+.hn{font-size:13px;font-weight:500;margin-bottom:2px;}
+.ha{font-size:10px;color:var(--text-muted);}
+.hdays{display:flex;gap:4px;}
+.dc{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--text-muted);}
+.dc.done{background:var(--accent3);border-color:var(--accent3);color:#fff;}
+.dc.today{border-color:var(--accent);color:var(--accent);}
+.str{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--accent4);text-align:center;min-width:35px;}
+.strl{font-size:9px;color:var(--text-muted);text-align:center;}
+.ahf{background:var(--surface2);border:1px dashed var(--border);border-radius:var(--r);padding:16px;margin-top:13px;}
+.ahf input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;margin-bottom:8px;}
+/* REVUE HEBDO */
+.rs{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:9px;transition:border-color .3s;}
+.rs.done2{border-color:var(--accent3);}
+.rsh{display:flex;align-items:center;gap:11px;margin-bottom:11px;}
+.snum{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;flex-shrink:0;}
+.snum.done{background:var(--accent3);}
+.rs textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;resize:vertical;min-height:65px;outline:none;}
+/* REVUE MENSUELLE */
+.rmp{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:11px;}
+.rph{display:flex;align-items:center;gap:11px;margin-bottom:13px;}
+.pbadge{padding:4px 12px;border-radius:20px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;}
+.pcel{background:rgba(247,151,30,.2);color:var(--accent4)}.pan{background:rgba(108,99,255,.2);color:var(--accent)}.paj{background:rgba(56,189,248,.2);color:var(--accent5)}.ppr{background:rgba(67,233,123,.2);color:var(--accent3)}
+.sl2{display:flex;flex-direction:column;gap:6px;margin-bottom:11px;}
+.si{display:flex;align-items:center;gap:9px;}
+.snum2{font-family:'Syne',sans-serif;font-size:10px;color:var(--accent4);font-weight:700;width:18px;}
+.si input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:7px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;}
+/* INBOX */
+.ib-counter{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.ibc{text-align:center;flex:1;min-width:70px;}
+.ibcv{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.ibcl{font-size:10px;color:var(--text-muted);}
+.ibs{display:flex;align-items:flex-start;gap:13px;padding:13px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:7px;cursor:pointer;transition:all .2s;}
+.ibs:hover{border-color:var(--accent);}
+.ibsi{font-size:20px;flex-shrink:0;}
+.ibsinfo{flex:1;}
+.ibst{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:2px;}
+.ibsd{font-size:11px;color:var(--text-muted);}
+.ibsv{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+/* DESENCOMBREMENT */
+.decl-p{height:5px;background:var(--border);border-radius:3px;margin-bottom:14px;overflow:hidden;}
+.decl-pb{height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent5));border-radius:3px;transition:width .4s ease;}
+.dsec{margin-bottom:16px;}
+.dstitle{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.di{display:flex;align-items:center;gap:11px;padding:10px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:5px;cursor:pointer;transition:all .2s;}
+.di:hover{border-color:var(--accent5);}
+.di.ck{border-color:var(--accent3);}
+.dich{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.di.ck .dich{background:var(--accent3);border-color:var(--accent3);color:#fff;}
+.dit{font-size:12px;flex:1;}
+.di.ck .dit{text-decoration:line-through;color:var(--text-muted);}
+/* PLAN 30 */
+.pw{margin-bottom:20px;}
+.pwtitle{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:9px 14px;border-radius:var(--rs);margin-bottom:9px;}
+.pw1{background:rgba(108,99,255,.15);color:var(--accent)}.pw2{background:rgba(56,189,248,.15);color:var(--accent5)}.pw3{background:rgba(247,151,30,.15);color:var(--accent4)}.pw4{background:rgba(67,233,123,.15);color:var(--accent3)}
+.pi2{display:flex;align-items:flex-start;gap:11px;padding:10px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:5px;cursor:pointer;transition:all .2s;}
+.pi2:hover{border-color:var(--accent);}
+.pi2.dn .pit{text-decoration:line-through;color:var(--text-muted);}
+.pic{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;margin-top:1px;}
+.pi2.dn .pic{background:var(--accent3);border-color:var(--accent3);color:#fff;}
+.pday{font-size:10px;color:var(--text-muted);font-weight:600;width:55px;flex-shrink:0;}
+.pit{font-size:12px;flex:1;}
+/* OBJECTIFS 1AN */
+.oac{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:9px;}
+.oad{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;font-weight:600;}
+/* IA */
+.iam{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:18px;}
+.imc{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center;}
+.imc:hover{border-color:var(--accent);transform:translateY(-2px);}
+.imc.sel{border-color:var(--accent);background:rgba(108,99,255,.1);}
+.imi{font-size:24px;margin-bottom:7px;}
+.imt{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;margin-bottom:4px;}
+.imd{font-size:10px;color:var(--text-muted);line-height:1.4;}
+.chat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);height:390px;display:flex;flex-direction:column;}
+.chatttl{padding:13px 17px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:9px;}
+.iadot{width:7px;height:7px;border-radius:50%;background:var(--accent3);animation:pu 2s infinite;}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
+.msgs{flex:1;overflow-y:auto;padding:13px 17px;display:flex;flex-direction:column;gap:9px;}
+.msg{max-width:83%;padding:10px 14px;border-radius:13px;font-size:12px;line-height:1.55;white-space:pre-wrap;}
+.msg.ai{background:var(--surface2);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:3px;}
+.msg.user{background:var(--accent);align-self:flex-end;border-bottom-right-radius:3px;}
+.msg.loading{opacity:.5;font-style:italic;}
+.cir{padding:10px 13px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.cir input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;}
+.cir input:focus{border-color:var(--accent);}
+.bsend{background:var(--accent);border:none;border-radius:8px;padding:9px 15px;color:#fff;cursor:pointer;font-size:14px;transition:opacity .2s;}
+.bsend:hover{opacity:.85;}
+.bsend:disabled{opacity:.35;cursor:not-allowed;}
+/* MODAL */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;}
+.mo.open{display:flex;}
+.mod{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;width:350px;}
+.mod h3{font-family:'Syne',sans-serif;font-size:16px;margin-bottom:16px;}
+.mod input,.mod select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;margin-bottom:9px;}
+.mbtns{display:flex;gap:8px;margin-top:5px;}
+.bcancel{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px;color:var(--text-muted);cursor:pointer;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;}
+/* RITUELS */
+.rit-hero{background:linear-gradient(135deg,rgba(108,99,255,.15),rgba(255,101,132,.08));border:1px solid rgba(108,99,255,.25);border-radius:var(--r);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;}
+.rit-hero-icon{font-size:36px;flex-shrink:0;}
+.rit-hero-text h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:4px;}
+.rit-hero-text p{font-size:12px;color:var(--text-muted);line-height:1.6;}
+.rit-freq{margin-bottom:22px;}
+.rit-freq-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.rit-freq-title.daily{color:var(--accent3);}
+.rit-freq-title.weekly{color:var(--accent);}
+.rit-freq-title.monthly{color:var(--accent4);}
+.rit-item{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;transition:border-color .2s;}
+.rit-item:hover{border-color:var(--border);}
+.rit-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.rit-item.daily .rit-dot{background:var(--accent3);}
+.rit-item.weekly .rit-dot{background:var(--accent);}
+.rit-item.monthly .rit-dot{background:var(--accent4);}
+.rit-content{flex:1;}
+.rit-name{font-size:13px;font-weight:500;margin-bottom:2px;}
+.rit-desc{font-size:11px;color:var(--text-muted);line-height:1.5;}
+.rit-link{font-size:10px;color:var(--accent);cursor:pointer;text-decoration:underline;margin-top:3px;display:inline-block;}
+.rit-link:hover{color:var(--accent2);}
+.rit-time{font-size:10px;color:var(--text-muted);white-space:nowrap;background:var(--surface);border:1px solid var(--border);padding:3px 8px;border-radius:20px;flex-shrink:0;}
+/* CHAT RITUELS */
+.rit-chat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);height:360px;display:flex;flex-direction:column;}
+.rit-chat-title{padding:13px 17px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:9px;}
+.rit-msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.rit-msg{max-width:85%;padding:10px 13px;border-radius:12px;font-size:12px;line-height:1.55;white-space:pre-wrap;}
+.rit-msg.ai{background:var(--surface2);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:3px;}
+.rit-msg.user{background:var(--accent);align-self:flex-end;border-bottom-right-radius:3px;}
+.rit-msg.loading{opacity:.5;font-style:italic;}
+.rit-input-row{padding:10px 13px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.rit-input-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;}
+.rit-input-row input:focus{border-color:var(--accent);}
+.rit-analyze-btn{background:linear-gradient(135deg,var(--accent),#8b5cf6);border:none;border-radius:var(--rs);padding:10px 16px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;width:100%;margin-bottom:10px;transition:opacity .2s;}
+.rit-analyze-btn:hover{opacity:.88;}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="lc">
+    <div class="logo">OrganisAI</div>
+    <div class="logo-sub">Système d'organisation personnelle complet</div>
+    <input type="text" id="lu" placeholder="Nom d'utilisateur" />
+    <input type="password" id="lp" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')login()" />
+    <button class="btn-p" onclick="login()">Accéder →</button>
+    <div class="lerr" id="lerr">Identifiants incorrects</div>
+    <div style="margin-top:12px;font-size:10px;color:var(--text-muted)">admin / 1234 &nbsp;·&nbsp; amadou / epf2026</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="sidebar">
+    <div class="s-logo">OrganisAI</div>
+    <div class="nav-sec">Principal</div>
+    <div class="ni active" onclick="sp('rituels',this)"><span class="ic">✨</span>Rituels & Coach</div>
+    <div class="ni" onclick="sp('dashboard',this)"><span class="ic">🏠</span>Dashboard</div>
+    <div class="ni" onclick="sp('timer',this)"><span class="ic">⏱️</span>Timer 52/17</div>
+    <div class="nav-sec">GTD</div>
+    <div class="ni" onclick="sp('capture',this)"><span class="ic">⚡</span>Capture<span class="badge" id="bc">0</span></div>
+    <div class="ni" onclick="sp('listes',this)"><span class="ic">📋</span>Mes listes</div>
+    <div class="nav-sec">Planification</div>
+    <div class="ni" onclick="sp('eisenhower',this)"><span class="ic">🎯</span>Matrice</div>
+    <div class="ni" onclick="sp('timeblocking',this)"><span class="ic">🕐</span>Time Blocking</div>
+    <div class="ni" onclick="sp('objectifs-an',this)"><span class="ic">🌟</span>Objectifs 1 an</div>
+    <div class="nav-sec">Suivi</div>
+    <div class="ni" onclick="sp('habitudes',this)"><span class="ic">🔥</span>Habitudes</div>
+    <div class="ni" onclick="sp('revue',this)"><span class="ic">📅</span>Revue hebdo</div>
+    <div class="ni" onclick="sp('revue-mensuelle',this)"><span class="ic">📊</span>Revue mensuelle</div>
+    <div class="nav-sec">Outils</div>
+    <div class="ni" onclick="sp('inbox',this)"><span class="ic">📧</span>Inbox Zero</div>
+    <div class="ni" onclick="sp('desencombrement',this)"><span class="ic">🧹</span>Désencombrement</div>
+    <div class="ni" onclick="sp('plan30',this)"><span class="ic">📆</span>Plan 30 jours</div>
+    <div class="nav-sec">Coach</div>
+    <div class="ni" onclick="sp('ia',this)"><span class="ic">🤖</span>Coach IA</div>
+    <div class="s-bot">
+      <div class="ni" onclick="setKey()" style="margin-bottom:5px;"><span class="ic">🔑</span>Clé API DeepSeek</div>
+      <div class="ubadge" onclick="logout()">
+        <div class="av" id="uav">A</div>
+        <div><div style="font-size:12px;font-weight:500;" id="uname">Admin</div><div style="font-size:10px;color:var(--text-muted)">Se déconnecter</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- RITUELS & COACH IA -->
+    <div class="page active" id="page-rituels">
+      <div class="ph"><h2>✨ Rituels & Coach IA</h2><p>Ce qu'il faut faire chaque jour, chaque semaine, chaque mois — ton coach analyse où tu en es</p></div>
+
+      <div class="g2" style="align-items:start;">
+        <div>
+          <!-- RITUELS QUOTIDIENS -->
+          <div class="rit-freq">
+            <div class="rit-freq-title daily">🟢 Chaque jour</div>
+            <div class="rit-item daily">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">☀️ Matin — Définir 3 objectifs du jour</div>
+                <div class="rit-desc">Avant de toucher ton téléphone. Note tes 3 priorités sur le Dashboard.</div>
+                <span class="rit-link" onclick="sp('dashboard',null)">→ Ouvrir Dashboard</span>
+              </div>
+              <div class="rit-time">5 min</div>
+            </div>
+            <div class="rit-item daily">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">⚡ Capturer tout ce qui entre dans ta tête</div>
+                <div class="rit-desc">Une idée, une tâche, un souci ? Capture-le immédiatement. Ne garde rien dans la tête.</div>
+                <span class="rit-link" onclick="sp('capture',null)">→ Ouvrir Capture</span>
+              </div>
+              <div class="rit-time">Continu</div>
+            </div>
+            <div class="rit-item daily">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">⏱️ Travailler en blocs 52/17</div>
+                <div class="rit-desc">Démarre le timer avant chaque session de travail. Zéro notification pendant les 52 min.</div>
+                <span class="rit-link" onclick="sp('timer',null)">→ Ouvrir Timer</span>
+              </div>
+              <div class="rit-time">Par session</div>
+            </div>
+            <div class="rit-item daily">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">🔥 Cocher tes habitudes du jour</div>
+                <div class="rit-desc">En fin de journée, valide les habitudes réalisées pour maintenir ton streak.</div>
+                <span class="rit-link" onclick="sp('habitudes',null)">→ Ouvrir Habitudes</span>
+              </div>
+              <div class="rit-time">2 min</div>
+            </div>
+            <div class="rit-item daily">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">📧 Traiter les emails en batch</div>
+                <div class="rit-desc">1 à 2 fois par jour max, jamais en continu. Appliquer la méthode Inbox Zero.</div>
+                <span class="rit-link" onclick="sp('inbox',null)">→ Ouvrir Inbox Zero</span>
+              </div>
+              <div class="rit-time">20 min</div>
+            </div>
+          </div>
+
+          <!-- RITUELS HEBDOMADAIRES -->
+          <div class="rit-freq">
+            <div class="rit-freq-title weekly">🟣 Chaque semaine</div>
+            <div class="rit-item weekly">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">📅 Revue hebdomadaire GTD (5 étapes)</div>
+                <div class="rit-desc">Vider les captures · Mettre à jour les listes · Vérifier les attentes · Parcourir "Un jour" · Planifier la semaine.</div>
+                <span class="rit-link" onclick="sp('revue',null)">→ Ouvrir Revue hebdo</span>
+              </div>
+              <div class="rit-time">30–60 min</div>
+            </div>
+            <div class="rit-item weekly">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">🕐 Planifier le Time Blocking de la semaine</div>
+                <div class="rit-desc">Bloquer tes créneaux de feu en priorité, puis le reste. Faire le dimanche soir ou lundi matin.</div>
+                <span class="rit-link" onclick="sp('timeblocking',null)">→ Ouvrir Time Blocking</span>
+              </div>
+              <div class="rit-time">15 min</div>
+            </div>
+            <div class="rit-item weekly">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">🎯 Vérifier la matrice Eisenhower</div>
+                <div class="rit-desc">Rien ne doit rester en Q1 (urgent+important) plus de 2 jours. Déplacer et déléguer.</div>
+                <span class="rit-link" onclick="sp('eisenhower',null)">→ Ouvrir Matrice</span>
+              </div>
+              <div class="rit-time">10 min</div>
+            </div>
+          </div>
+
+          <!-- RITUELS MENSUELS -->
+          <div class="rit-freq">
+            <div class="rit-freq-title monthly">🟠 Chaque mois</div>
+            <div class="rit-item monthly">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">📊 Revue mensuelle (4 phases)</div>
+                <div class="rit-desc">Célébrer 10 succès · Analyser ce qui a fonctionné/bloqué · Ajuster les habitudes · Projeter 3 priorités.</div>
+                <span class="rit-link" onclick="sp('revue-mensuelle',null)">→ Ouvrir Revue mensuelle</span>
+              </div>
+              <div class="rit-time">2h</div>
+            </div>
+            <div class="rit-item monthly">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">🧹 Désencombrement numérique</div>
+                <div class="rit-desc">Emails, apps, fichiers, photos, sauvegarde 3-2-1. Faire en même temps que la revue mensuelle.</div>
+                <span class="rit-link" onclick="sp('desencombrement',null)">→ Ouvrir Désencombrement</span>
+              </div>
+              <div class="rit-time">30 min</div>
+            </div>
+            <div class="rit-item monthly">
+              <div class="rit-dot"></div>
+              <div class="rit-content">
+                <div class="rit-name">🌟 Relire ses objectifs à 1 an</div>
+                <div class="rit-desc">Tes décisions du mois sont-elles alignées avec tes objectifs annuels ? Ajuster si nécessaire.</div>
+                <span class="rit-link" onclick="sp('objectifs-an',null)">→ Ouvrir Objectifs 1 an</span>
+              </div>
+              <div class="rit-time">10 min</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COACH IA PANEL -->
+        <div>
+          <div style="background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.2);border-radius:var(--r);padding:16px;margin-bottom:12px;">
+            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:6px;">🤖 Coach IA — Que faire maintenant ?</div>
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">Le coach analyse ton état actuel (habitudes, captures, listes) et te dit exactement quoi faire en ce moment.</div>
+            <button class="rit-analyze-btn" onclick="analyzeNow()">✨ Analyser mon état et me guider</button>
+          </div>
+          <div class="rit-chat">
+            <div class="rit-chat-title"><div class="iadot"></div><span>Coach de rituels</span></div>
+            <div class="rit-msgs" id="rit-msgs">
+              <div class="rit-msg ai">Bonjour ! Clique sur "Analyser mon état" et je vais regarder où tu en es dans ton système pour te dire exactement quoi faire maintenant. 🎯</div>
+            </div>
+            <div class="rit-input-row">
+              <input type="text" id="rit-input" placeholder="Pose-moi une question..." onkeydown="if(event.key==='Enter')sendRit()" />
+              <button class="bsend" onclick="sendRit()">→</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page" id="page-dashboard">
+      <div class="ph"><h2 id="gname">Bonjour 👋</h2><p id="gdate"></p></div>
+      <div class="g4" style="margin-bottom:18px;">
+        <div class="sc pu"><div class="sl">Actions GTD</div><div class="sv pu" id="st1">0</div></div>
+        <div class="sc gr"><div class="sl">Objectifs accomplis</div><div class="sv gr" id="st2">0/3</div></div>
+        <div class="sc or"><div class="sl">Meilleur streak</div><div class="sv or" id="st3">0🔥</div></div>
+        <div class="sc pi"><div class="sl">À capturer</div><div class="sv pi" id="st4">0</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ct">🎯 3 objectifs du jour</div><div id="objlist"></div></div>
+        <div class="card"><div class="ct">⚡ Captures récentes</div><div id="crec"></div><button class="bc" style="margin-top:11px;width:100%;" onclick="sp('capture',null)">+ Nouvelle capture</button></div>
+      </div>
+    </div>
+
+    <!-- TIMER -->
+    <div class="page" id="page-timer">
+      <div class="ph"><h2>⏱️ Timer 52 / 17</h2><p>52 min de travail concentré · 17 min de vraie pause · Étude sur 5,5M journées de travail</p></div>
+      <div class="g2">
+        <div class="card">
+          <div class="tcon">
+            <input class="tinp" id="tinp" placeholder="Sur quoi tu travailles ?" />
+            <div class="tplbl w" id="tplbl">Temps de feu 🟣</div>
+            <div class="trw work" id="trw">
+              <svg width="190" height="190" viewBox="0 0 190 190">
+                <circle class="tbg" cx="95" cy="95" r="83"/>
+                <circle class="tpr" id="tpr" cx="95" cy="95" r="83" stroke-dasharray="521" stroke-dashoffset="0"/>
+              </svg>
+              <div class="tdisp"><div class="ttime" id="ttime">52:00</div><div class="tph" id="tsub">TRAVAIL</div></div>
+            </div>
+            <div class="tctrl">
+              <button class="tbtn start" id="tbtn" onclick="toggleTimer()">▶ Démarrer</button>
+              <button class="tbtn rst" onclick="resetTimer()">↺ Reset</button>
+            </div>
+            <div class="tcyc">Cycles : <span id="tcyc">0</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">📖 Pourquoi 52/17 ?</div>
+          <div style="color:var(--text-muted);font-size:12px;line-height:1.8;">
+            <p style="margin-bottom:11px;">Issue d'une étude DeskTime sur <strong style="color:var(--text)">5,5 millions de journées de travail</strong>, cette règle optimise le rythme naturel d'attention du cerveau.</p>
+            <div style="background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.3);border-radius:10px;padding:13px;margin-bottom:9px;">
+              <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:3px;">🟣 52 min — Travail profond</div>
+              <div style="font-size:11px;">Concentration totale. Zéro notification. Zéro multitâche.</div>
+            </div>
+            <div style="background:rgba(67,233,123,.1);border:1px solid rgba(67,233,123,.3);border-radius:10px;padding:13px;margin-bottom:13px;">
+              <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--accent3);margin-bottom:3px;">🟢 17 min — Vraie pause</div>
+              <div style="font-size:11px;">Marche, étirement, fenêtre. <strong style="color:var(--text)">Zéro écran.</strong></div>
+            </div>
+            <p>Différent du Pomodoro (25/5) — ce cycle respecte mieux les rythmes cérébraux naturels d'énergie et de récupération.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPTURE -->
+    <div class="page" id="page-capture">
+      <div class="ph"><h2>⚡ Capture GTD</h2><p>Vide ta tête sans filtrer · La règle des 2 minutes est détectée automatiquement</p></div>
+      <div class="cz"><textarea id="cinp" placeholder="Qu'est-ce qui occupe ton esprit ? Note tout..." rows="3"></textarea><button class="bc" onclick="addCap()">Capturer</button></div>
+      <div style="margin-bottom:13px;"><div class="ct">📥 À traiter (<span id="ccount">0</span>)</div><p style="font-size:11px;color:var(--text-muted);margin-bottom:13px;">⚡ Faire · 👤 Déléguer · 📅 Différer · 🗑️ Supprimer — Règle des 2 min : si ça prend moins de 2 min, fais-le maintenant</p></div>
+      <div id="clist"></div>
+    </div>
+
+    <!-- LISTES GTD -->
+    <div class="page" id="page-listes">
+      <div class="ph"><h2>📋 Mes listes GTD</h2><p>Organiser → Réviser → Agir</p></div>
+      <div class="gtabs">
+        <div class="gt active" onclick="swGTD('actions',this)">⚡ Actions</div>
+        <div class="gt" onclick="swGTD('projets',this)">📁 Projets</div>
+        <div class="gt" onclick="swGTD('attente',this)">⏳ Attente</div>
+        <div class="gt" onclick="swGTD('underjour',this)">💡 Un jour</div>
+      </div>
+      <div class="gl active" id="gl-actions">
+        <div class="ctxf">
+          <button class="cf af" onclick="fctx('all',this)">Tous</button>
+          <button class="cf" onclick="fctx('ordi',this)">@ordinateur</button>
+          <button class="cf" onclick="fctx('bureau',this)">@bureau</button>
+          <button class="cf" onclick="fctx('tel',this)">@téléphone</button>
+          <button class="cf" onclick="fctx('ville',this)">@ville</button>
+          <button class="cf" onclick="fctx('maison',this)">@maison</button>
+        </div>
+        <div id="actions-list"></div>
+        <div class="air"><input type="text" id="actions-input" class="fi" placeholder="Verbe d'action + tâche..." onkeydown="if(event.key==='Enter')addGTD('actions')"/><select id="action-ctx" class="fis"><option value="ordi">@ordinateur</option><option value="bureau">@bureau</option><option value="tel">@téléphone</option><option value="ville">@ville</option><option value="maison">@maison</option></select><button class="bc" onclick="addGTD('actions')">+</button></div>
+      </div>
+      <div class="gl" id="gl-projets">
+        <div id="projets-list"></div>
+        <div class="air"><input type="text" id="projets-input" class="fi" placeholder="Projet + objectif final..." onkeydown="if(event.key==='Enter')addGTD('projets')"/><button class="bc" onclick="addGTD('projets')">+</button></div>
+      </div>
+      <div class="gl" id="gl-attente">
+        <div id="attente-list"></div>
+        <div class="air"><input type="text" id="attente-input" class="fi" placeholder="Attente de qui / quoi..." onkeydown="if(event.key==='Enter')addGTD('attente')"/><button class="bc" onclick="addGTD('attente')">+</button></div>
+      </div>
+      <div class="gl" id="gl-underjour">
+        <div id="underjour-list"></div>
+        <div class="air"><input type="text" id="underjour-input" class="fi" placeholder="Idée future..." onkeydown="if(event.key==='Enter')addGTD('underjour')"/><button class="bc" onclick="addGTD('underjour')">+</button></div>
+      </div>
+    </div>
+
+    <!-- EISENHOWER -->
+    <div class="page" id="page-eisenhower">
+      <div class="ph"><h2>🎯 Matrice d'Eisenhower</h2><p>Règle d'or : 60% du temps dans PLANIFIER (important / non urgent)</p></div>
+      <div class="matrix" style="gap:0;">
+        <div></div>
+        <div style="text-align:center;font-size:10px;color:var(--accent2);font-weight:700;padding:5px;">🔴 URGENT</div>
+        <div style="text-align:center;font-size:10px;color:var(--accent5);font-weight:700;padding:5px;">🔵 NON URGENT</div>
+        <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;color:var(--accent3);font-weight:700;padding:5px;text-align:center;">✅ IMPORTANT</div>
+        <div class="quad q1" ondragover="event.preventDefault()" ondrop="dropM(event,'q1')"><div class="qt">FAIRE</div><div class="qs">Crises, deadlines</div><div id="mq1"></div><div class="mir"><input type="text" placeholder="Ajouter..." onkeydown="if(event.key==='Enter')addMi('q1',this)"/><button class="bam" onclick="addMib('q1',this)">+</button></div></div>
+        <div class="quad q2" ondragover="event.preventDefault()" ondrop="dropM(event,'q2')"><div class="qt">PLANIFIER</div><div class="qs">Projets, formation</div><div id="mq2"></div><div class="mir"><input type="text" placeholder="Ajouter..." onkeydown="if(event.key==='Enter')addMi('q2',this)"/><button class="bam" onclick="addMib('q2',this)">+</button></div></div>
+        <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;color:var(--text-muted);font-weight:700;padding:5px;text-align:center;">❌ NON IMPORTANT</div>
+        <div class="quad q3" ondragover="event.preventDefault()" ondrop="dropM(event,'q3')"><div class="qt">DÉLÉGUER</div><div class="qs">Interruptions</div><div id="mq3"></div><div class="mir"><input type="text" placeholder="Ajouter..." onkeydown="if(event.key==='Enter')addMi('q3',this)"/><button class="bam" onclick="addMib('q3',this)">+</button></div></div>
+        <div class="quad q4" ondragover="event.preventDefault()" ondrop="dropM(event,'q4')"><div class="qt">ÉLIMINER</div><div class="qs">Distractions</div><div id="mq4"></div><div class="mir"><input type="text" placeholder="Ajouter..." onkeydown="if(event.key==='Enter')addMi('q4',this)"/><button class="bam" onclick="addMib('q4',this)">+</button></div></div>
+      </div>
+    </div>
+
+    <!-- TIME BLOCKING -->
+    <div class="page" id="page-timeblocking">
+      <div class="ph"><h2>🕐 Time Blocking</h2><p>Blocs de 90–120 min · Emails en fin de journée · Protège tes blocs de feu</p></div>
+      <div class="tleg">
+        <div class="li"><div class="ld" style="background:var(--accent)"></div>Temps de feu</div>
+        <div class="li"><div class="ld" style="background:var(--accent5)"></div>Temps fluide</div>
+        <div class="li"><div class="ld" style="background:var(--accent4)"></div>Maintenance</div>
+        <div class="li"><div class="ld" style="background:var(--accent3)"></div>Pause</div>
+      </div>
+      <div class="card" style="padding:16px;"><div class="tgrid" id="tgrid"></div></div>
+    </div>
+
+    <!-- OBJECTIFS 1 AN -->
+    <div class="page" id="page-objectifs-an">
+      <div class="ph"><h2>🌟 Objectifs à 1 an</h2><p>3 priorités absolues · "Qu'est-ce qui changerait dans ma vie si je réussissais ça ?"</p></div>
+      <div style="background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.2);border-radius:var(--r);padding:14px;margin-bottom:18px;font-size:12px;color:var(--text-muted);line-height:1.7;">💡 Un bon objectif te touche émotionnellement. Si la réponse au "pourquoi" te donne de l'énergie, c'est le bon.</div>
+      <div id="oan-list"></div>
+      <button class="btn-p" style="margin-top:4px;" onclick="saveOAN()">💾 Sauvegarder</button>
+    </div>
+
+    <!-- HABITUDES -->
+    <div class="page" id="page-habitudes">
+      <div class="ph"><h2>🔥 Suivi des habitudes</h2><p>Tiny Habits : "Après [X], je vais [Y]" · 21j pour démarrer · 66j pour ancrer · 254j pour les habitudes complexes</p></div>
+      <div id="hlist"></div>
+      <div class="ahf">
+        <div class="ct" style="margin-bottom:9px;">+ Nouvelle habitude</div>
+        <input type="text" id="hni" placeholder="Habitude (ex: noter mes 3 objectifs)" />
+        <input type="text" id="hai" placeholder="Ancrage (ex: Après mon café du matin)" />
+        <button class="bc" onclick="addHabit()">Ajouter</button>
+      </div>
+    </div>
+
+    <!-- REVUE HEBDO -->
+    <div class="page" id="page-revue">
+      <div class="ph"><h2>📅 Revue hebdomadaire</h2><p>30–60 min chaque semaine · Le cœur battant de GTD</p></div>
+      <div class="rs" id="rs1"><div class="rsh"><div class="snum" id="sn1">1</div><div><strong>Vider les captures</strong><br><span style="font-size:11px;color:var(--text-muted)">As-tu tout capturé cette semaine ?</span></div></div><textarea placeholder="Notes libres..." onchange="mRS(1)"></textarea></div>
+      <div class="rs" id="rs2"><div class="rsh"><div class="snum" id="sn2">2</div><div><strong>Mettre à jour les listes</strong><br><span style="font-size:11px;color:var(--text-muted)">Actions terminées, nouveaux projets...</span></div></div><textarea placeholder="Ce qui a changé..." onchange="mRS(2)"></textarea></div>
+      <div class="rs" id="rs3"><div class="rsh"><div class="snum" id="sn3">3</div><div><strong>Vérifier les attentes</strong><br><span style="font-size:11px;color:var(--text-muted)">Quelles relances faire ?</span></div></div><textarea placeholder="Personnes à relancer..." onchange="mRS(3)"></textarea></div>
+      <div class="rs" id="rs4"><div class="rsh"><div class="snum" id="sn4">4</div><div><strong>Parcourir "Un jour / Peut-être"</strong><br><span style="font-size:11px;color:var(--text-muted)">Idées à activer maintenant ?</span></div></div><textarea placeholder="Idées à activer..." onchange="mRS(4)"></textarea></div>
+      <div class="rs" id="rs5"><div class="rsh"><div class="snum" id="sn5">5</div><div><strong>Planifier la semaine à venir</strong><br><span style="font-size:11px;color:var(--text-muted)">Tes 3 priorités absolues</span></div></div><textarea placeholder="Priorité 1: ...&#10;Priorité 2: ...&#10;Priorité 3: ..." onchange="mRS(5)"></textarea></div>
+      <button class="btn-p" style="margin-top:9px;" onclick="alert('✅ Revue terminée ! Ton système est à jour.')">✓ Terminer la revue</button>
+    </div>
+
+    <!-- REVUE MENSUELLE -->
+    <div class="page" id="page-revue-mensuelle">
+      <div class="ph"><h2>📊 Revue mensuelle</h2><p>2h par mois · 4 phases : Célébrer → Analyser → Ajuster → Projeter</p></div>
+      <div class="rmp"><div class="rph"><span class="pbadge pcel">🏆 CÉLÉBRER</span><div><strong>Tes 10 succès du mois</strong><br><span style="font-size:11px;color:var(--text-muted)">Même les petits — la gratitude renforce la motivation</span></div></div><div class="sl2" id="slist"></div></div>
+      <div class="rmp"><div class="rph"><span class="pbadge pan">🔍 ANALYSER</span><div><strong>Ce qui a fonctionné / bloqué</strong></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;"><div><div style="font-size:11px;color:var(--accent3);margin-bottom:5px;font-weight:600;">✅ Ce qui a fonctionné</div><textarea class="fi" style="resize:vertical;min-height:80px;width:100%;" id="rmf" placeholder="Habitudes tenues, méthodes efficaces..."></textarea></div><div><div style="font-size:11px;color:var(--accent2);margin-bottom:5px;font-weight:600;">❌ Ce qui a bloqué</div><textarea class="fi" style="resize:vertical;min-height:80px;width:100%;" id="rmb" placeholder="Obstacles, patterns négatifs..."></textarea></div></div></div>
+      <div class="rmp"><div class="rph"><span class="pbadge paj">⚙️ AJUSTER</span><div><strong>Habitudes à modifier pour le mois prochain</strong></div></div><textarea class="fi" style="resize:vertical;min-height:75px;width:100%;" id="rma" placeholder="Habitude à créer: ...&#10;Habitude à supprimer: ...&#10;Habitude à modifier: ..."></textarea></div>
+      <div class="rmp"><div class="rph"><span class="pbadge ppr">🚀 PROJETER</span><div><strong>3 priorités absolues du mois à venir</strong></div></div><div style="display:flex;flex-direction:column;gap:7px;"><input class="fi" id="rmp1" placeholder="Priorité 1 :"/><input class="fi" id="rmp2" placeholder="Priorité 2 :"/><input class="fi" id="rmp3" placeholder="Priorité 3 :"/></div></div>
+      <button class="btn-p" style="margin-top:9px;" onclick="saveRM()">💾 Sauvegarder la revue</button>
+    </div>
+
+    <!-- INBOX ZERO -->
+    <div class="page" id="page-inbox">
+      <div class="ph"><h2>📧 Inbox Zero</h2><p>Méthode Merlin Mann · Chaque email traité une seule fois</p></div>
+      <div class="ib-counter">
+        <div class="ibc"><div class="ibcv" style="color:var(--accent2);" id="ib-s">0</div><div class="ibcl">Supprimés</div></div>
+        <div class="ibc"><div class="ibcv" style="color:var(--accent4);" id="ib-d">0</div><div class="ibcl">Délégués</div></div>
+        <div class="ibc"><div class="ibcv" style="color:var(--accent3);" id="ib-r">0</div><div class="ibcl">Répondus</div></div>
+        <div class="ibc"><div class="ibcv" style="color:var(--accent5);" id="ib-f">0</div><div class="ibcl">Différés</div></div>
+        <div class="ibc"><div class="ibcv" style="color:var(--accent);" id="ib-a">0</div><div class="ibcl">Archivés</div></div>
+        <button class="bc" onclick="resetIB()" style="margin-left:auto;">Nouvelle session</button>
+      </div>
+      <div class="ibs" onclick="incIB('s')"><div class="ibsi">🗑️</div><div class="ibsinfo"><div class="ibst" style="color:var(--accent2);">SUPPRIMER</div><div class="ibsd">Email indésirable ou info obsolète → Supprimer directement</div></div><div class="ibsv" style="color:var(--accent2);">+1</div></div>
+      <div class="ibs" onclick="incIB('d')"><div class="ibsi">👤</div><div class="ibsinfo"><div class="ibst" style="color:var(--accent4);">DÉLÉGUER</div><div class="ibsd">Pas de ton ressort → Transférer immédiatement</div></div><div class="ibsv" style="color:var(--accent4);">+1</div></div>
+      <div class="ibs" onclick="incIB('r')"><div class="ibsi">✍️</div><div class="ibsinfo"><div class="ibst" style="color:var(--accent3);">RÉPONDRE <span class="tmb">⚡ -2 min</span></div><div class="ibsd">Réponse rapide (&lt;2 min) → Répondre maintenant puis archiver</div></div><div class="ibsv" style="color:var(--accent3);">+1</div></div>
+      <div class="ibs" onclick="incIB('f')"><div class="ibsi">📅</div><div class="ibsinfo"><div class="ibst" style="color:var(--accent5);">DIFFÉRER</div><div class="ibsd">Réponse &gt;2 min → Classer "À traiter" et programmer un créneau</div></div><div class="ibsv" style="color:var(--accent5);">+1</div></div>
+      <div class="ibs" onclick="incIB('a')"><div class="ibsi">📂</div><div class="ibsinfo"><div class="ibst" style="color:var(--accent);">ARCHIVER</div><div class="ibsd">Info utile sans action → Archiver pour référence</div></div><div class="ibsv" style="color:var(--accent);">+1</div></div>
+    </div>
+
+    <!-- DÉSENCOMBREMENT -->
+    <div class="page" id="page-desencombrement">
+      <div class="ph"><h2>🧹 Désencombrement numérique</h2><p>30 minutes par mois · Checklist Module 4</p></div>
+      <div class="decl-p"><div class="decl-pb" id="dpbar" style="width:0%"></div></div>
+      <div style="text-align:right;font-size:11px;color:var(--text-muted);margin-bottom:14px;" id="dpcount">0 / 0</div>
+      <div class="dsec"><div class="dstitle">📧 Emails & newsletters</div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Se désabonner des newsletters non lues depuis 1 mois</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Vider la boîte de réception (Inbox Zero)</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Archiver les emails anciens par année</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Supprimer les brouillons inutiles</div></div>
+      </div>
+      <div class="dsec"><div class="dstitle">📱 Applications</div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Supprimer les apps non utilisées depuis 3 mois</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Désactiver les notifications non essentielles</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Vérifier les abonnements actifs (annuler si inutilisés)</div></div>
+      </div>
+      <div class="dsec"><div class="dstitle">📁 Fichiers & dossiers</div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Vider le dossier Téléchargements</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Archiver les fichiers obsolètes dans Archive_2026</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Renommer les fichiers : YYYY-MM-DD-Type-Sujet</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Vérifier la structure Année > Projet > Type</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Vider la corbeille</div></div>
+      </div>
+      <div class="dsec"><div class="dstitle">📸 Photos & médias</div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Supprimer photos floues et doublons</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Supprimer les captures d'écran inutiles</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">Organiser les photos restantes par album/date</div></div>
+      </div>
+      <div class="dsec"><div class="dstitle">☁️ Sauvegarde 3-2-1</div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">3 copies de tes données importantes ✓</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">2 supports différents (disque dur + cloud) ✓</div></div>
+        <div class="di" onclick="togD(this)"><div class="dich"></div><div class="dit">1 copie hors site (cloud actif) ✓</div></div>
+      </div>
+      <button class="btn-p" onclick="resetD()">↺ Recommencer</button>
+    </div>
+
+    <!-- PLAN 30 JOURS -->
+    <div class="page" id="page-plan30">
+      <div class="ph"><h2>📆 Plan 30 premiers jours</h2><p>Module 7 · Ne saute pas d'étapes — la constance prime sur la vitesse</p></div>
+      <div class="decl-p"><div class="decl-pb" id="planbar" style="width:0%"></div></div>
+      <div style="text-align:right;font-size:11px;color:var(--text-muted);margin-bottom:14px;" id="plancount">0 / 14</div>
+      <div class="pw"><div class="pwtitle pw1">📍 Semaine 1 — Fondations</div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 1-2</div><div class="pit">Bilan temporel — noter toutes tes activités par tranches de 30 min</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 3</div><div class="pit">Choisir un outil de capture unique → utiliser ⚡ Capture</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 4-5</div><div class="pit">Brain dump complet — vider toute ta tête dans la Capture GTD</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 6-7</div><div class="pit">Première revue hebdomadaire — traiter les captures, créer les listes</div></div>
+      </div>
+      <div class="pw"><div class="pwtitle pw2">🔵 Semaine 2 — Clarification</div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 8-9</div><div class="pit">Traiter toutes les captures : Faire / Déléguer / Différer / Supprimer</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 10-11</div><div class="pit">Créer les listes structurées dans 📋 Mes listes GTD</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 12-13</div><div class="pit">Définir tes 3 objectifs à 1 an dans 🌟 Objectifs 1 an</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 14</div><div class="pit">2ème revue hebdo + planification Time Blocking</div></div>
+      </div>
+      <div class="pw"><div class="pwtitle pw3">🟠 Semaine 3 — Espace</div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 15-16</div><div class="pit">Trier les papiers administratifs (archiver, scanner, jeter)</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 17-18</div><div class="pit">Organiser ton espace de travail selon les 5S</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 19-20</div><div class="pit">Désencombrement numérique complet → checklist 🧹</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 21</div><div class="pit">3ème revue hebdo + ajustement du système</div></div>
+      </div>
+      <div class="pw"><div class="pwtitle pw4">🟢 Semaine 4 — Habitudes</div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 22-24</div><div class="pit">2 micro-habitudes ancrées → tracker 🔥 Habitudes</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 25-26</div><div class="pit">Technique des 3 objectifs journaliers chaque matin sur le Dashboard</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 27-28</div><div class="pit">Ajuster le système selon ce qui fonctionne / bloque</div></div>
+        <div class="pi2" onclick="togP(this)"><div class="pic"></div><div class="pday">Jour 29-30</div><div class="pit">🎉 Première revue mensuelle + célébration de tes progrès !</div></div>
+      </div>
+    </div>
+
+    <!-- COACH IA -->
+    <div class="page" id="page-ia">
+      <div class="ph"><h2>🤖 Coach IA</h2><p>DeepSeek te guide · Clé API requise</p></div>
+      <div class="iam">
+        <div class="imc" onclick="selIA('bilan',this)"><div class="imi">⏱️</div><div class="imt">Bilan temporel</div><div class="imd">Analyse ton utilisation du temps</div></div>
+        <div class="imc" onclick="selIA('revmens',this)"><div class="imi">📊</div><div class="imt">Revue mensuelle</div><div class="imd">Célébrer, analyser, ajuster, projeter</div></div>
+        <div class="imc" onclick="selIA('konmari',this)"><div class="imi">🧹</div><div class="imt">KonMari / 5S</div><div class="imd">Trier espace physique et numérique</div></div>
+        <div class="imc" onclick="selIA('procras',this)"><div class="imi">🧠</div><div class="imt">Anti-procrastination</div><div class="imd">Technique 5 min, Eat the Frog</div></div>
+        <div class="imc" onclick="selIA('habits',this)"><div class="imi">🔥</div><div class="imt">Coach habitudes</div><div class="imd">Construire des habitudes durables</div></div>
+        <div class="imc" onclick="selIA('objectifs',this)"><div class="imi">🎯</div><div class="imt">Clarifier objectifs</div><div class="imd">Définir tes priorités à 1 an</div></div>
+      </div>
+      <div class="chat">
+        <div class="chatttl"><div class="iadot"></div><span id="chatttl">Choisis un module pour commencer</span></div>
+        <div class="msgs" id="msgs"><div class="msg ai">Bonjour ! Choisis un module ci-dessus pour démarrer une session guidée. Je m'appuie sur les méthodes GTD, Eisenhower, Tiny Habits et les 7 modules du cours. 🎯</div></div>
+        <div class="cir"><input type="text" id="cinput" placeholder="Ta réponse..." onkeydown="if(event.key==='Enter')sendMsg()" disabled/><button class="bsend" id="bsend" onclick="sendMsg()" disabled>→</button></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mo" id="modal-tb">
+  <div class="mod">
+    <h3>⏰ Configurer ce créneau</h3>
+    <input type="text" id="tb-task" placeholder="Tâche / activité..." />
+    <select id="tb-type"><option value="feu">🟣 Temps de feu</option><option value="fluide">🔵 Temps fluide</option><option value="maintenance">🟠 Maintenance</option><option value="pause">🟢 Pause</option></select>
+    <div class="mbtns"><button class="bcancel" onclick="closeMo()">Annuler</button><button class="btn-p" style="flex:1;" onclick="saveTB()">Enregistrer</button></div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let S={user:null,caps:[],gtd:{actions:[],projets:[],attente:[],underjour:[]},mx:{q1:[],q2:[],q3:[],q4:[]},tb:{},habits:[],obj:['','',''],objD:[false,false,false],oan:[{d:'Études / CPGE',o:'',w:''},{d:'Projets personnels',o:'',w:''},{d:'Santé / bien-être',o:'',w:''}],ib:{s:0,d:0,r:0,f:0,a:0},succ:Array(10).fill('')};
+const USERS={'admin':'1234','amadou':'epf2026'};
+let curTB=null,curIA=null,chatHist=[],dragItem=null,ctxF='all';
+const CIRC=2*Math.PI*83;
+let tInt=null,tRun=false,tWork=true,tSec=52*60,tCyc=0;
+const WT=52*60,RT=17*60;
+
+// ===== LOGIN =====
+function login(){
+  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+  if(USERS[u]&&USERS[u]===p){
+    S.user=u;loadS();
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('uav').textContent=u[0].toUpperCase();
+    document.getElementById('uname').textContent=u.charAt(0).toUpperCase()+u.slice(1);
+    document.getElementById('gname').textContent='Bonjour '+u.charAt(0).toUpperCase()+u.slice(1)+' 👋';
+    document.getElementById('lp').value='';
+    document.getElementById('lerr').style.display='none';
+    init();
+  } else { document.getElementById('lerr').style.display='block'; }
+}
+function logout(){saveS();resetTimer();document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';}
+
+// ===== PERSISTANCE =====
+function saveS(){if(!S.user)return;localStorage.setItem('oai_'+S.user,JSON.stringify(S));}
+function loadS(){const d=localStorage.getItem('oai_'+S.user);if(d){const p=JSON.parse(d);S={...S,...p,user:S.user};}}
+
+// ===== INIT =====
+function init(){
+  const d=new Date();
+  const J=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const M=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  document.getElementById('gdate').textContent=J[d.getDay()]+' '+d.getDate()+' '+M[d.getMonth()]+' '+d.getFullYear();
+  rObj();rGTD('actions');rGTD('projets');rGTD('attente');rGTD('underjour');rMx();rTG();rHab();rOAN();rSucc();rIB();updStats();updateTD();
+}
+
+// ===== NAV =====
+function sp(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+// ===== OBJECTIFS =====
+function rObj(){
+  const l=document.getElementById('objlist');if(!l)return;
+  l.innerHTML='';
+  for(let i=0;i<3;i++){
+    const done=S.objD[i];
+    const d=document.createElement('div');d.className='oi';
+    d.innerHTML=`<div class="oc ${done?'done':''}" onclick="togObj(${i})">${done?'✓':''}</div><div style="flex:1;${done?'text-decoration:line-through;color:var(--text-muted)':''}"><input class="ii" placeholder="Objectif ${i+1}..." value="${S.obj[i]||''}" onchange="S.obj[${i}]=this.value;saveS();updStats()"/></div>`;
+    l.appendChild(d);
+  }
+  updStats();
+}
+function togObj(i){S.objD[i]=!S.objD[i];saveS();rObj();updStats();}
+
+// ===== STATS =====
+function updStats(){
+  const done=S.objD.filter(Boolean).length;
+  document.getElementById('st2').textContent=done+'/3';
+  document.getElementById('st4').textContent=S.caps.length;
+  document.getElementById('bc').textContent=S.caps.length;
+  document.getElementById('st1').textContent=S.gtd.actions.filter(a=>!a.done).length;
+  let mx=0;S.habits.forEach(h=>{if(h.streak>mx)mx=h.streak;});
+  document.getElementById('st3').textContent=mx+'🔥';
+  const cr=document.getElementById('crec');
+  if(cr){
+    if(!S.caps.length){cr.innerHTML='<div style="color:var(--text-muted);font-size:12px;">Tête vide — parfait ! 🧠</div>';}
+    else{cr.innerHTML=S.caps.slice(0,3).map(c=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:7px;"><span style="color:var(--accent)">●</span>${c.t}</div>`).join('');if(S.caps.length>3)cr.innerHTML+=`<div style="font-size:10px;color:var(--text-muted);margin-top:5px;">+${S.caps.length-3} autres...</div>`;}
+  }
+}
+
+// ===== CAPTURE =====
+function addCap(){
+  const inp=document.getElementById('cinp');const t=inp.value.trim();if(!t)return;
+  S.caps.push({id:Date.now(),t,short:t.length<60});inp.value='';saveS();rCaps();updStats();
+}
+function rCaps(){
+  const l=document.getElementById('clist');if(!l)return;
+  const c=document.getElementById('ccount');if(c)c.textContent=S.caps.length;
+  if(!S.caps.length){l.innerHTML='<div style="text-align:center;padding:32px;color:var(--text-muted);">🧠 Tête vide !</div>';return;}
+  l.innerHTML=S.caps.map((c,i)=>`<div class="citem"><div style="flex:1;font-size:12px;">${c.t}${c.short?'<span class="tmb" style="margin-left:7px;">⚡ -2 min ?</span>':''}</div><button class="bs ba" onclick="procCap(${i},'action')">⚡ Faire</button><button class="bs bd" onclick="procCap(${i},'attente')">👤 Déléguer</button><button class="bs bf" onclick="procCap(${i},'underjour')">📅 Différer</button><button class="bs bx" onclick="procCap(${i},'del')">🗑️</button></div>`).join('');
+}
+function procCap(i,a){
+  const c=S.caps[i];
+  if(a==='action'){S.gtd.actions.push({id:Date.now(),t:c.t,ctx:'ordi',done:false});rGTD('actions');}
+  else if(a==='attente'){S.gtd.attente.push({id:Date.now(),t:c.t,done:false});rGTD('attente');}
+  else if(a==='underjour'){S.gtd.underjour.push({id:Date.now(),t:c.t,done:false});rGTD('underjour');}
+  S.caps.splice(i,1);saveS();rCaps();updStats();
+}
+
+// ===== GTD =====
+function swGTD(t,el){
+  document.querySelectorAll('.gt').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.gl').forEach(x=>x.classList.remove('active'));
+  if(el)el.classList.add('active');document.getElementById('gl-'+t).classList.add('active');
+}
+function fctx(c,el){ctxF=c;document.querySelectorAll('.cf').forEach(x=>x.classList.remove('af'));if(el)el.classList.add('af');rGTD('actions');}
+function addGTD(list){
+  const inp=document.getElementById(list+'-input');const t=inp?inp.value.trim():'';if(!t)return;
+  const item={id:Date.now(),t,done:false};
+  if(list==='actions')item.ctx=document.getElementById('action-ctx').value;
+  S.gtd[list].push(item);if(inp)inp.value='';saveS();rGTD(list);updStats();
+}
+function rGTD(list){
+  const c=document.getElementById(list+'-list');if(!c)return;
+  let items=S.gtd[list];
+  if(list==='actions'&&ctxF!=='all')items=items.filter(x=>x.ctx===ctxF);
+  if(!items.length){c.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:10px 0;">Aucun élément</div>';return;}
+  const cm={bureau:'tb',ordi:'to',tel:'tt',ville:'tv',maison:'tm'};
+  const cl={bureau:'@bureau',ordi:'@ordi',tel:'@tél',ville:'@ville',maison:'@maison'};
+  c.innerHTML=items.map((x,i)=>`<div class="gi"><div class="oc ${x.done?'done':''}" onclick="togGTD('${list}',${i})" style="width:18px;height:18px;font-size:9px;">${x.done?'✓':''}</div><div style="flex:1;font-size:12px;${x.done?'text-decoration:line-through;color:var(--text-muted)':''}">${x.t}</div>${list==='actions'?`<span class="ctag ${cm[x.ctx]||'to'}">${cl[x.ctx]||'@ordi'}</span>`:''}<button class="delbtn" onclick="delGTD('${list}',${i})">✕</button></div>`).join('');
+}
+function togGTD(l,i){S.gtd[l][i].done=!S.gtd[l][i].done;saveS();rGTD(l);}
+function delGTD(l,i){S.gtd[l].splice(i,1);saveS();rGTD(l);updStats();}
+
+// ===== EISENHOWER =====
+function addMi(q,inp){const t=inp.value.trim();if(!t)return;S.mx[q].push({id:Date.now(),t});inp.value='';saveS();rMx();}
+function addMib(q,btn){addMi(q,btn.previousElementSibling);}
+function rMx(){['q1','q2','q3','q4'].forEach(q=>{const c=document.getElementById('m'+q);if(!c)return;c.innerHTML=S.mx[q].map((x,i)=>`<div class="mi" draggable="true" ondragstart="dragItem='{q:&quot;${q}&quot;,i:${i}}'"><span style="flex:1;">${x.t}</span><button class="delbtn" style="font-size:11px;" onclick="delMi('${q}',${i})">✕</button></div>`).join('');});}
+function dropM(e,tq){
+  if(!dragItem)return;
+  try{const d=JSON.parse(dragItem.replace(/'/g,'"'));const x=S.mx[d.q][d.i];S.mx[d.q].splice(d.i,1);S.mx[tq].push(x);}catch(ex){}
+  dragItem=null;saveS();rMx();
+}
+function delMi(q,i){S.mx[q].splice(i,1);saveS();rMx();}
+document.addEventListener('dragstart',e=>{const t=e.target.closest('.mi');if(t&&t.getAttribute('ondragstart'))dragItem=t.getAttribute('ondragstart').match(/'\{.*\}'/)?t.getAttribute('ondragstart').match(/'\{.*\}'/)[0].slice(1,-1):null;});
+
+// ===== TIME BLOCKING =====
+const HRS=['05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30'];
+function rTG(){
+  const g=document.getElementById('tgrid');if(!g)return;
+  g.innerHTML=HRS.map(h=>{const b=S.tb[h];const tc=b?b.type:'';const lbl=b?`<div class="bdot"></div><span>${b.task}</span>`:'<span style="color:var(--text-muted);font-size:10px;">Cliquer pour bloquer</span>';
+  return`<div class="tslot"><div class="tlabel">${h}</div><div class="tblock ${tc}" onclick="openTB('${h}')">${lbl}</div></div>`;}).join('');
+}
+function openTB(s){curTB=s;const b=S.tb[s];document.getElementById('tb-task').value=b?b.task:'';document.getElementById('tb-type').value=b?b.type:'feu';document.getElementById('modal-tb').classList.add('open');}
+function closeMo(){document.getElementById('modal-tb').classList.remove('open');curTB=null;}
+function saveTB(){const t=document.getElementById('tb-task').value.trim(),tp=document.getElementById('tb-type').value;if(!t)delete S.tb[curTB];else S.tb[curTB]={task:t,type:tp};saveS();rTG();closeMo();}
+
+// ===== OBJECTIFS 1 AN =====
+function rOAN(){
+  const l=document.getElementById('oan-list');if(!l)return;
+  l.innerHTML=S.oan.map((o,i)=>`<div class="oac"><div class="oad">${o.d}</div><input class="fi" style="margin-bottom:8px;" placeholder="Mon objectif à 1 an..." value="${o.o||''}" onchange="S.oan[${i}].o=this.value"/><textarea class="fi" style="resize:vertical;min-height:55px;width:100%;" placeholder='Pourquoi ? "Si je réussis ça, ma vie changera parce que..."' onchange="S.oan[${i}].w=this.value">${o.w||''}</textarea></div>`).join('');
+}
+function saveOAN(){saveS();alert('✅ Objectifs sauvegardés !');}
+
+// ===== TIMER =====
+function updateTD(){
+  const m=Math.floor(tSec/60),s=tSec%60;
+  document.getElementById('ttime').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const tot=tWork?WT:RT,prog=tSec/tot,off=CIRC*(1-prog);
+  const pr=document.getElementById('tpr');pr.style.strokeDashoffset=off;pr.style.strokeDasharray=CIRC;
+  const rw=document.getElementById('trw'),pl=document.getElementById('tplbl'),sb=document.getElementById('tsub');
+  if(tWork){rw.className='trw work';pl.className='tplbl w';pl.textContent='Temps de feu 🟣';sb.textContent='TRAVAIL';}
+  else{rw.className='trw rest';pl.className='tplbl r';pl.textContent='Pause 🟢';sb.textContent='REPOS';}
+}
+function toggleTimer(){
+  const btn=document.getElementById('tbtn');
+  if(tRun){clearInterval(tInt);tRun=false;btn.textContent='▶ Reprendre';btn.classList.remove('run');}
+  else{tRun=true;btn.textContent='⏸ Pause';btn.classList.add('run');tInt=setInterval(()=>{tSec--;if(tSec<=0){clearInterval(tInt);tRun=false;if(tWork){tCyc++;document.getElementById('tcyc').textContent=tCyc;tWork=false;tSec=RT;alert('✅ 52 min terminées ! 17 min de vraie pause — zéro écran !');}else{tWork=true;tSec=WT;alert('🟣 Pause terminée ! Retour au travail concentré.');}btn.textContent='▶ Démarrer';btn.classList.remove('run');}updateTD();},1000);}
+}
+function resetTimer(){clearInterval(tInt);tRun=false;tWork=true;tSec=WT;document.getElementById('tbtn').textContent='▶ Démarrer';document.getElementById('tbtn').classList.remove('run');updateTD();}
+
+// ===== HABITUDES =====
+function addHabit(){
+  const n=document.getElementById('hni').value.trim(),a=document.getElementById('hai').value.trim();if(!n)return;
+  S.habits.push({id:Date.now(),n,a,days:Array(7).fill(false),streak:0});
+  document.getElementById('hni').value='';document.getElementById('hai').value='';saveS();rHab();
+}
+function rHab(){
+  const l=document.getElementById('hlist');if(!l)return;
+  const DN=['D','L','M','M','J','V','S'],td=new Date().getDay();
+  if(!S.habits.length){l.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:14px 0;">Aucune habitude — ajoute-en une ci-dessous !</div>';return;}
+  l.innerHTML=S.habits.map((h,hi)=>`<div class="hc"><div class="hi"><div class="hn">${h.n}</div>${h.a?`<div class="ha">📌 ${h.a}</div>`:''}</div><div class="hdays">${h.days.map((d,di)=>`<div class="dc ${d?'done':''} ${di===td?'today':''}" onclick="togHab(${hi},${di})">${DN[di]}</div>`).join('')}</div><div><div class="str">${h.streak}</div><div class="strl">🔥 jours</div></div><button class="delbtn" onclick="delHab(${hi})">✕</button></div>`).join('');
+}
+function togHab(hi,di){
+  S.habits[hi].days[di]=!S.habits[hi].days[di];
+  const days=S.habits[hi].days;let str=0;const td=new Date().getDay();
+  for(let i=td;i>=0;i--){if(days[i])str++;else break;}
+  S.habits[hi].streak=str;saveS();rHab();updStats();
+}
+function delHab(hi){S.habits.splice(hi,1);saveS();rHab();}
+
+// ===== REVUE HEBDO =====
+function mRS(n){const el=document.getElementById('sn'+n),rs=document.getElementById('rs'+n);if(el){el.classList.add('done');el.textContent='✓';}if(rs)rs.classList.add('done2');}
+
+// ===== REVUE MENSUELLE =====
+function rSucc(){
+  const l=document.getElementById('slist');if(!l)return;
+  l.innerHTML=Array.from({length:10},(_,i)=>`<div class="si"><div class="snum2">${i+1}.</div><input placeholder="Un succès..." value="${S.succ[i]||''}" onchange="S.succ[${i}]=this.value"/></div>`).join('');
+}
+function saveRM(){S.succ=Array.from({length:10},(_,i)=>{const x=document.querySelectorAll('.si input')[i];return x?x.value:'';});saveS();alert('✅ Revue mensuelle sauvegardée !');}
+
+// ===== INBOX ZERO =====
+function rIB(){['s','d','r','f','a'].forEach(k=>{const el=document.getElementById('ib-'+k);if(el)el.textContent=S.ib[k];});}
+function incIB(k){S.ib[k]++;saveS();rIB();}
+function resetIB(){S.ib={s:0,d:0,r:0,f:0,a:0};saveS();rIB();}
+
+// ===== DÉSENCOMBREMENT =====
+function togD(el){el.classList.toggle('ck');const c=el.querySelector('.dich');c.textContent=el.classList.contains('ck')?'✓':'';updDP();}
+function updDP(){const all=document.querySelectorAll('.di'),done=document.querySelectorAll('.di.ck'),pct=all.length?Math.round(done.length/all.length*100):0;const b=document.getElementById('dpbar'),c=document.getElementById('dpcount');if(b)b.style.width=pct+'%';if(c)c.textContent=done.length+' / '+all.length;}
+function resetD(){document.querySelectorAll('.di').forEach(el=>{el.classList.remove('ck');const c=el.querySelector('.dich');if(c)c.textContent='';});updDP();}
+
+// ===== PLAN 30 JOURS =====
+function togP(el){el.classList.toggle('dn');const c=el.querySelector('.pic');c.textContent=el.classList.contains('dn')?'✓':'';updPlan();}
+function updPlan(){const all=document.querySelectorAll('.pi2'),done=document.querySelectorAll('.pi2.dn'),pct=all.length?Math.round(done.length/all.length*100):0;const b=document.getElementById('planbar'),c=document.getElementById('plancount');if(b)b.style.width=pct+'%';if(c)c.textContent=done.length+' / '+all.length;}
+
+// ===== COACH IA =====
+const IAP={
+  'bilan':`Tu es coach d'organisation basé sur le Module 2 du cours "L'Organisation Personnelle". Guide le bilan temporel 3 jours : demande les activités par tranches 30min, classe en Temps fixe/feu/fluide/perdu, calcule les pourcentages. Alerte si temps perdu >20% ou feu <15%. Une question à la fois. Réponds en français.`,
+  'revmens':`Tu es coach basé sur le Module 6. Guide les 4 phases : CÉLÉBRER (10 succès), ANALYSER (patterns), AJUSTER (habitudes), PROJETER (3 priorités). Une question à la fois, bienveillant. Français.`,
+  'konmari':`Tu es coach KonMari + 5S (Module 4). Guide le tri : "Est-ce utile ou source de joie ?" Commence : espace physique ou numérique ? Français.`,
+  'procras':`Tu es coach anti-procrastination (Module 5). La procrastination = réponse au stress, pas de la paresse. Maîtrises : 5 minutes, Eat the Frog, réduction de friction. Demande quelle tâche, diagnostique, propose la technique. Direct et bienveillant. Français.`,
+  'habits':`Tu es coach Tiny Habits de BJ Fogg (Module 5). Format : "Après [X], je vais [Y]". Règle 21/66/254 jours. Demande l'habitude voulue et pourquoi. Français.`,
+  'objectifs':`Tu es coach de clarification d'objectifs. Questions puissantes : "Qu'est-ce qui changerait dans ta vie ?" 3 priorités à 1 an. Commence par le domaine de vie. Français.`
+};
+const IAT={'bilan':'⏱️ Bilan temporel','revmens':'📊 Revue mensuelle','konmari':'🧹 KonMari / 5S','procras':'🧠 Anti-procrastination','habits':'🔥 Coach habitudes','objectifs':'🎯 Clarifier objectifs'};
+
+function selIA(mod,el){
+  curIA=mod;chatHist=[];
+  document.querySelectorAll('.imc').forEach(c=>c.classList.remove('sel'));if(el)el.classList.add('sel');
+  document.getElementById('chatttl').textContent=IAT[mod];
+  document.getElementById('msgs').innerHTML='';
+  document.getElementById('cinput').disabled=false;document.getElementById('bsend').disabled=false;
+  const ld=addMsg('ai','Chargement...');ld.classList.add('loading');
+  callDS('Commence la session.',true,ld);
+}
+function addMsg(role,text){
+  const m=document.getElementById('msgs'),d=document.createElement('div');d.className='msg '+role;d.textContent=text;m.appendChild(d);m.scrollTop=m.scrollHeight;return d;
+}
+async function sendMsg(){
+  const inp=document.getElementById('cinput'),t=inp.value.trim();if(!t||!curIA)return;
+  inp.value='';addMsg('user',t);const ld=addMsg('ai','...');ld.classList.add('loading');await callDS(t,false,ld);
+}
+async function callDS(msg,isFirst,ldEl){
+  let key=localStorage.getItem('ds_key');
+  if(!key){const k=prompt('Entre ta clé API DeepSeek :');if(!k){if(ldEl){ldEl.textContent='Clé API requise.';ldEl.classList.remove('loading');}return;}localStorage.setItem('ds_key',k.trim());key=k.trim();}
+  if(isFirst)chatHist=[];
+  chatHist.push({role:'user',content:msg});
+  try{
+    const r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'deepseek-chat',max_tokens:1000,messages:[{role:'system',content:IAP[curIA]},...chatHist]})});
+    const data=await r.json();
+    if(data.error)throw new Error(data.error.message);
+    const reply=data.choices?.[0]?.message?.content||'Erreur de réponse.';
+    chatHist.push({role:'assistant',content:reply});
+    if(ldEl){ldEl.textContent=reply;ldEl.classList.remove('loading');}else addMsg('ai',reply);
+  }catch(e){
+    const err='Erreur : '+(e.message||'Vérifie ta clé.');
+    if(ldEl){ldEl.textContent=err;ldEl.classList.remove('loading');}else addMsg('ai',err);
+    if(e.message&&e.message.toLowerCase().includes('auth'))localStorage.removeItem('ds_key');
+  }
+}
+function setKey(){const c=localStorage.getItem('ds_key'),k=prompt('Clé API DeepSeek :'+(c?'\n(actuelle : '+c.slice(0,8)+'...)':''));if(k&&k.trim()){localStorage.setItem('ds_key',k.trim());alert('✅ Clé sauvegardée !');}}
+
+
+// ===== RITUELS COACH =====
+let ritChatHist = [];
+
+function addRitMsg(role, text) {
+  const m = document.getElementById('rit-msgs');
+  const d = document.createElement('div');
+  d.className = 'rit-msg ' + role;
+  d.textContent = text;
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
+  return d;
+}
+
+function buildStateSnapshot() {
+  const today = new Date().getDay();
+  const caps = S.caps.length;
+  const actions = S.gtd.actions.filter(a => !a.done).length;
+  const projets = S.gtd.projets.length;
+  const attente = S.gtd.attente.length;
+  const habitsTotal = S.habits.length;
+  const habitsDoneToday = S.habits.filter(h => h.days[today]).length;
+  const bestStreak = S.habits.length ? Math.max(...S.habits.map(h => h.streak)) : 0;
+  const objDone = S.objD.filter(Boolean).length;
+  const tbBlocs = Object.keys(S.tb).length;
+  const oanFilled = S.oan.filter(o => o.o && o.o.trim()).length;
+  const d = new Date();
+  const J = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const jourSemaine = J[d.getDay()];
+  const heure = d.getHours();
+  let moment = heure < 10 ? 'matin tôt' : heure < 13 ? 'matinée' : heure < 18 ? 'après-midi' : 'soirée';
+  
+  return `État actuel de l'utilisateur OrganisAI :
+- Jour : ${jourSemaine} ${d.getDate()}/${d.getMonth()+1}, ${heure}h (${moment})
+- Captures en attente de traitement : ${caps}
+- Actions GTD actives (non terminées) : ${actions}
+- Projets en cours : ${projets}
+- Éléments en attente : ${attente}
+- Habitudes : ${habitsTotal} créées, ${habitsDoneToday}/${habitsTotal} cochées aujourd'hui
+- Meilleur streak habitudes : ${bestStreak} jours
+- Objectifs du jour complétés : ${objDone}/3
+- Blocs Time Blocking planifiés : ${tbBlocs}
+- Objectifs à 1 an renseignés : ${oanFilled}/3`;
+}
+
+const RIT_SYSTEM = `Tu es un coach d'organisation personnelle expert basé sur la méthode GTD, Eisenhower, Time Blocking et Tiny Habits. Tu analyses l'état actuel de l'utilisateur et tu lui dis exactement quoi faire MAINTENANT, dans cet ordre de priorité :
+1. Ce qui est urgent selon son état (captures en attente, objectifs non définis, habitudes non cochées...)
+2. Le rituel adapté à ce moment de la journée (matin = objectifs + Time Blocking, soir = habitudes + capture)
+3. Une seule action concrète à faire dans les 5 prochaines minutes
+
+Sois direct, précis, bienveillant. Pas de discours général. Cite les chiffres réels de son état. Maximum 150 mots par réponse. Réponds en français.`;
+
+async function analyzeNow() {
+  const snap = buildStateSnapshot();
+  const ld = addRitMsg('ai', 'Analyse en cours...');
+  ld.classList.add('loading');
+  ritChatHist = [];
+  
+  let key = localStorage.getItem('ds_key');
+  if (!key) {
+    const k = prompt('Entre ta clé API DeepSeek :');
+    if (!k) { ld.textContent = 'Clé API requise.'; ld.classList.remove('loading'); return; }
+    localStorage.setItem('ds_key', k.trim());
+    key = k.trim();
+  }
+  
+  const userMsg = 'Voici mon état actuel :\n' + snap + '\n\nAnalyse et dis-moi exactement quoi faire maintenant.';
+  ritChatHist.push({ role: 'user', content: userMsg });
+  
+  try {
+    const r = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({ model: 'deepseek-chat', max_tokens: 400, messages: [{ role: 'system', content: RIT_SYSTEM }, ...ritChatHist] })
+    });
+    const data = await r.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.choices?.[0]?.message?.content || 'Erreur de réponse.';
+    ritChatHist.push({ role: 'assistant', content: reply });
+    ld.textContent = reply;
+    ld.classList.remove('loading');
+  } catch(e) {
+    ld.textContent = 'Erreur : ' + (e.message || 'Vérifie ta clé.');
+    ld.classList.remove('loading');
+    if (e.message && e.message.toLowerCase().includes('auth')) localStorage.removeItem('ds_key');
+  }
+}
+
+async function sendRit() {
+  const inp = document.getElementById('rit-input');
+  const t = inp.value.trim();
+  if (!t) return;
+  inp.value = '';
+  addRitMsg('user', t);
+  const ld = addRitMsg('ai', '...');
+  ld.classList.add('loading');
+  
+  let key = localStorage.getItem('ds_key');
+  if (!key) {
+    const k = prompt('Entre ta clé API DeepSeek :');
+    if (!k) { ld.textContent = 'Clé API requise.'; ld.classList.remove('loading'); return; }
+    localStorage.setItem('ds_key', k.trim());
+    key = k.trim();
+  }
+  
+  // Si pas encore de contexte, ajouter l'état
+  if (ritChatHist.length === 0) {
+    const snap = buildStateSnapshot();
+    ritChatHist.push({ role: 'user', content: 'Contexte : \n' + snap });
+    ritChatHist.push({ role: 'assistant', content: 'Compris, je connais ton état.' });
+  }
+  ritChatHist.push({ role: 'user', content: t });
+  
+  try {
+    const r = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({ model: 'deepseek-chat', max_tokens: 400, messages: [{ role: 'system', content: RIT_SYSTEM }, ...ritChatHist] })
+    });
+    const data = await r.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.choices?.[0]?.message?.content || 'Erreur de réponse.';
+    ritChatHist.push({ role: 'assistant', content: reply });
+    ld.textContent = reply;
+    ld.classList.remove('loading');
+  } catch(e) {
+    ld.textContent = 'Erreur : ' + (e.message || 'Vérifie ta clé.');
+    ld.classList.remove('loading');
+  }
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMo();});
+updateTD();
+</script>
+</body>
+</html>
